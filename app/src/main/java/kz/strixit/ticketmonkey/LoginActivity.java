@@ -3,35 +3,41 @@ package kz.strixit.ticketmonkey;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
-import java.io.IOException;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class LoginActivity extends AppCompatActivity {
 
-    private Button signInButton;
+//    private Button signInButton;
     private EditText loginEditText, pswEditText;
 
-    private OkHttpClient client;
-    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    private String token;
 
     private static final String url = "http://tktmonkey.kz/api/login_reg/api-token-auth/";
-    private static final String jsonBody = "{'username':'saken','password':'saken'}";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        signInButton = (Button) findViewById(R.id.signInButton);
+        Button signInButton = (Button) findViewById(R.id.signInButton);
         loginEditText = (EditText) findViewById(R.id.loginEditText);
         pswEditText = (EditText) findViewById(R.id.pswEditText);
 
@@ -46,22 +52,55 @@ public class LoginActivity extends AppCompatActivity {
 
     private void signInButtonOnClick() {
 
-        Intent intent = new Intent(LoginActivity.this, CameraActivity.class);
-        startActivity(intent);
-    }
+        final String login = loginEditText.getText().toString();
+        final String psw = pswEditText.getText().toString();
 
-    private void getJson() throws IOException {
+        // Request
+        RequestQueue requestQueue = Volley.newRequestQueue(LoginActivity.this);
+        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>()
+                {
+                    @Override
+                    public void onResponse(String response) {
+                        // response
+                        Log.d("Response", response);
 
-        String json = authUser(url, jsonBody);
-    }
+                        try {
 
-    private String authUser(String url, String json) throws IOException {
-        RequestBody body = RequestBody.create(JSON, json);
-        Request request = new Request.Builder()
-                .url(url)
-                .post(body)
-                .build();
-        Response response = client.newCall(request).execute();
-        return response.body().string();
+                            JSONObject tokenJsonObject = new JSONObject(response);
+                            token = tokenJsonObject.getString("token");
+                            Log.d("token", token);
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        Intent intent = new Intent(LoginActivity.this, CameraActivity.class);
+                        intent.putExtra("token", token);
+                        startActivity(intent);
+                    }
+                },
+                new Response.ErrorListener()
+                {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                        // error
+                        Log.e("Error.Response", error.toString());
+                        Toast.makeText(LoginActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+        ) {
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String> params = new HashMap<>();
+                params.put("username", login);
+                params.put("password", psw);
+
+                return params;
+            }
+        };
+        requestQueue.add(postRequest);
     }
 }
