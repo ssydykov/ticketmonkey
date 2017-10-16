@@ -71,6 +71,8 @@ public class CameraActivity extends Activity implements ZXingScannerView.ResultH
         mScannerView.stopCamera();
     }
 
+    // Camera qr result:
+
     @Override
     public void handleResult(Result rawResult) {
         // Do something with the result here
@@ -85,8 +87,11 @@ public class CameraActivity extends Activity implements ZXingScannerView.ResultH
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>()
                 {
+                    // If Success
+
                     @Override
                     public void onResponse(String response) {
+
                         // response
                         Log.d("Response", response);
                         startNewActivity(response);
@@ -94,6 +99,8 @@ public class CameraActivity extends Activity implements ZXingScannerView.ResultH
                 },
                 new Response.ErrorListener()
                 {
+                    // If Error
+
                     @Override
                     public void onErrorResponse(VolleyError error) {
 
@@ -106,6 +113,8 @@ public class CameraActivity extends Activity implements ZXingScannerView.ResultH
             @Override
             protected Map<String, String> getParams()
             {
+                // Post params:
+
                 Map<String, String> params = new HashMap<>();
                 params.put("token", token);
 
@@ -113,6 +122,9 @@ public class CameraActivity extends Activity implements ZXingScannerView.ResultH
             }
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
+
+                // Headers params
+
                 Map<String, String>  params = new HashMap<>();
                 params.put("Authorization", "JWT " + tokenJwt);
                 params.put("Content-Type", "application/json");

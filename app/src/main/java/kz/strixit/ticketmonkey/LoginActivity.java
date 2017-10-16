@@ -41,6 +41,7 @@ public class LoginActivity extends AppCompatActivity {
         loginEditText = (EditText) findViewById(R.id.loginEditText);
         pswEditText = (EditText) findViewById(R.id.pswEditText);
 
+        // On click listener:
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -60,11 +61,15 @@ public class LoginActivity extends AppCompatActivity {
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>()
                 {
+                    // If Success
+
                     @Override
                     public void onResponse(String response) {
+
                         // response
                         Log.d("Response", response);
 
+                        // Parsing json object
                         try {
 
                             JSONObject tokenJsonObject = new JSONObject(response);
@@ -75,6 +80,7 @@ public class LoginActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
 
+                        // Start new Activity
                         Intent intent = new Intent(LoginActivity.this, CameraActivity.class);
                         intent.putExtra("token", token);
                         startActivity(intent);
@@ -82,18 +88,22 @@ public class LoginActivity extends AppCompatActivity {
                 },
                 new Response.ErrorListener()
                 {
+                    // If Error
+
                     @Override
                     public void onErrorResponse(VolleyError error) {
 
                         // error
                         Log.e("Error.Response", error.toString());
-                        Toast.makeText(LoginActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, error.toString(), Toast.LENGTH_SHORT).show();
                     }
                 }
         ) {
             @Override
             protected Map<String, String> getParams()
             {
+                // Post params
+
                 Map<String, String> params = new HashMap<>();
                 params.put("username", login);
                 params.put("password", psw);
