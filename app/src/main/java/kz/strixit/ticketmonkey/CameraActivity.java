@@ -6,9 +6,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -19,9 +19,6 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.zxing.Result;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,11 +26,11 @@ import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 public class CameraActivity extends Activity implements ZXingScannerView.ResultHandler {
 
-    private static final String TAG = "Main Activity";
+    private static final String TAG = "Camera Activity";
     private ZXingScannerView mScannerView;
 
     private static final String url = "http://tktmonkey.kz/api/events/approve-ticket/";
-    private String tokenJwt, token;
+    private String token;
 
     @Override
     public void onCreate(Bundle state) {
@@ -45,9 +42,8 @@ public class CameraActivity extends Activity implements ZXingScannerView.ResultH
             }
         }
 
-        Intent intent = getIntent();
-        tokenJwt = intent.getStringExtra("token");
-        Log.e("Intent token JWT", tokenJwt);
+        // Start periodic task
+        ((MyApplication) this.getApplication()).startRepeatingTask();
 
         // Programmatically initialize the scanner view
         mScannerView = new ZXingScannerView(this);
@@ -93,7 +89,7 @@ public class CameraActivity extends Activity implements ZXingScannerView.ResultH
                     public void onResponse(String response) {
 
                         // response
-                        Log.d("Response", response);
+                        Log.d(TAG, "Response " + response);
                         startNewActivity(response);
                     }
                 },
@@ -105,8 +101,13 @@ public class CameraActivity extends Activity implements ZXingScannerView.ResultH
                     public void onErrorResponse(VolleyError error) {
 
                         // error
-                        Log.e("Error.Response", error.toString());
-                        startNewActivity(error.toString());
+                        Log.e(TAG, "Request error " + error.toString());
+
+                        if (error.networkResponse.statusCode == 400) {
+
+                            Log.e(TAG, "Invalid qr");
+                            startNewActivity("Invalid qr code");
+                        }
                     }
                 }
         ) {
@@ -126,7 +127,7 @@ public class CameraActivity extends Activity implements ZXingScannerView.ResultH
                 // Headers params
 
                 Map<String, String>  params = new HashMap<>();
-                params.put("Authorization", "JWT " + tokenJwt);
+                params.put("Authorization", "JWT " + ((MyApplication) getApplication()).getToken());
                 params.put("Content-Type", "application/json");
 
                 return params;
