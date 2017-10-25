@@ -1,4 +1,4 @@
-package kz.strixit.ticketmonkey;
+package kz.strixit.ticketmonkey.module;
 
 /**
  * Created by saken2316 on 10/21/17.

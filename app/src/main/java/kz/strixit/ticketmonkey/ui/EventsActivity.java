@@ -1,9 +1,12 @@
-package kz.strixit.ticketmonkey;
+package kz.strixit.ticketmonkey.ui;
 
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -15,23 +18,25 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+import kz.strixit.ticketmonkey.AlarmReceiver;
+import kz.strixit.ticketmonkey.Constants;
+import kz.strixit.ticketmonkey.adapter.EventsAdapter;
+import kz.strixit.ticketmonkey.module.EventsModule;
+import kz.strixit.ticketmonkey.MyApplication;
+import kz.strixit.ticketmonkey.R;
+
+public class EventsActivity extends AppCompatActivity {
 
     private String qrCode;
     private ListView listView;
@@ -39,8 +44,8 @@ public class MainActivity extends AppCompatActivity {
     private List<EventsModule> events;
 
     private static final String TAG = "Main Activity";
-    private static final String url = "http://tktmonkey.kz/api/events/org/all/";
     private String[] myStringArray = {"Item 1", "Item 2", "Item 3"};
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +58,11 @@ public class MainActivity extends AppCompatActivity {
         listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(adapter);
 
+        // Retrieve a PendingIntent that will perform a broadcast
+        Intent alarmIntent = new Intent(this, AlarmReceiver.class);
+        ((MyApplication) getApplication()).setPendingIntent(PendingIntent.getBroadcast(this, 0, alarmIntent, 0));
+        ((MyApplication) getApplication()).startAlarm();
+
         Intent intent = getIntent();
         qrCode = intent.getStringExtra("qr_code");
 
@@ -62,8 +72,8 @@ public class MainActivity extends AppCompatActivity {
     private void getEvents() {
 
         // Request
-        RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.this);
-        StringRequest postRequest = new StringRequest(Request.Method.GET, url,
+        RequestQueue requestQueue = Volley.newRequestQueue(EventsActivity.this);
+        StringRequest postRequest = new StringRequest(Request.Method.GET, Constants.GET_EVENTS_URL,
                 new Response.Listener<String>()
                 {
                     // If Success
@@ -115,10 +125,23 @@ public class MainActivity extends AppCompatActivity {
         requestQueue.add(postRequest);
     }
 
-    private void displayEvents(List<EventsModule> events) {
+    private void displayEvents(final List<EventsModule> events) {
 
-        EventsAdapter eventsAdapter = new EventsAdapter(events, MainActivity.this);
+        EventsAdapter eventsAdapter = new EventsAdapter(events, EventsActivity.this);
         listView.setAdapter(eventsAdapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                String eventId = Integer.toString(events.get(i).getId());
+                Log.e(TAG, eventId);
+
+                Intent intent = new Intent(EventsActivity.this, CameraActivity.class);
+                intent.putExtra("event_id", eventId);
+                startActivity(intent);
+            }
+        });
     }
 
     private List<EventsModule> parseJson(String response){

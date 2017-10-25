@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="kz.strixit.ticketmonkey.MainActivity">
+    tools:context="kz.strixit.ticketmonkey.ui.EventsActivity">
 
 
     <ImageView
@@ -23,11 +23,12 @@
         android:id="@+id/priceTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
+        android:layout_marginLeft="16dp"
         android:layout_marginTop="8dp"
         android:text="TextView"
+        android:textAlignment="viewStart"
         android:textSize="12sp"
-        app:layout_constraintLeft_toLeftOf="@+id/coverImageView"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="@+id/coverImageView" />
 
     <TextView
@@ -58,6 +59,7 @@
         android:layout_marginRight="16dp"
         android:layout_marginTop="0dp"
         android:text="Button"
+        android:visibility="gone"
         app:layout_constraintRight_toRightOf="@+id/coverImageView"
         app:layout_constraintTop_toBottomOf="@+id/titleTextView" />
 </android.support.constraint.ConstraintLayout>

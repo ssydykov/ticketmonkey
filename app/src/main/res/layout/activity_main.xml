@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="kz.strixit.ticketmonkey.MainActivity">
+    tools:context="kz.strixit.ticketmonkey.ui.EventsActivity">
 
     <!--<TextView-->
         <!--android:id="@+id/textView"-->

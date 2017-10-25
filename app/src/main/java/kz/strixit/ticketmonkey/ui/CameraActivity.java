@@ -1,4 +1,4 @@
-package kz.strixit.ticketmonkey;
+package kz.strixit.ticketmonkey.ui;
 
 import android.app.Activity;
 import android.Manifest;
@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
@@ -22,6 +21,8 @@ import com.google.zxing.Result;
 import java.util.HashMap;
 import java.util.Map;
 
+import kz.strixit.ticketmonkey.Constants;
+import kz.strixit.ticketmonkey.MyApplication;
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 public class CameraActivity extends Activity implements ZXingScannerView.ResultHandler {
@@ -29,8 +30,8 @@ public class CameraActivity extends Activity implements ZXingScannerView.ResultH
     private static final String TAG = "Camera Activity";
     private ZXingScannerView mScannerView;
 
-    private static final String url = "http://tktmonkey.kz/api/events/approve-ticket/";
     private String token;
+    private String eventId;
 
     @Override
     public void onCreate(Bundle state) {
@@ -42,8 +43,8 @@ public class CameraActivity extends Activity implements ZXingScannerView.ResultH
             }
         }
 
-        // Start periodic task
-        ((MyApplication) this.getApplication()).startRepeatingTask();
+        Intent intent = getIntent();
+        eventId = intent.getStringExtra("event_id");
 
         // Programmatically initialize the scanner view
         mScannerView = new ZXingScannerView(this);
@@ -78,9 +79,14 @@ public class CameraActivity extends Activity implements ZXingScannerView.ResultH
         Log.v(TAG, rawResult.getBarcodeFormat().toString());
         token = rawResult.getText();
 
+        checkQrRequest();
+    }
+
+    private void checkQrRequest() {
+
         // Request
         RequestQueue requestQueue = Volley.newRequestQueue(CameraActivity.this);
-        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+        StringRequest postRequest = new StringRequest(Request.Method.POST, Constants.CHECK_QR_URL,
                 new Response.Listener<String>()
                 {
                     // If Success
@@ -118,6 +124,7 @@ public class CameraActivity extends Activity implements ZXingScannerView.ResultH
 
                 Map<String, String> params = new HashMap<>();
                 params.put("token", token);
+                params.put("id", eventId);
 
                 return params;
             }
@@ -134,14 +141,10 @@ public class CameraActivity extends Activity implements ZXingScannerView.ResultH
             }
         };
         requestQueue.add(postRequest);
-
-        // If you would like to resume scanning, call this method below:
-//        mScannerView.resumeCameraPreview(this);
     }
-
     private void startNewActivity(String message){
 
-        Intent intent = new Intent(CameraActivity.this, MainActivity.class);
+        Intent intent = new Intent(CameraActivity.this, EventsActivity.class);
         intent.putExtra("qr_code", message);
         startActivity(intent);
     }

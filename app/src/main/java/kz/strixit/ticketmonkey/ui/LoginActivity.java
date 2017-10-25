@@ -1,8 +1,7 @@
-package kz.strixit.ticketmonkey;
+package kz.strixit.ticketmonkey.ui;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,14 +12,9 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.NetworkError;
-import com.android.volley.NoConnectionError;
-import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.ServerError;
-import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -31,6 +25,10 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import kz.strixit.ticketmonkey.Constants;
+import kz.strixit.ticketmonkey.MyApplication;
+import kz.strixit.ticketmonkey.R;
+
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -39,8 +37,6 @@ public class LoginActivity extends AppCompatActivity {
     private ProgressBar progressBar;
 
     private String token;
-
-    private static final String url = "http://tktmonkey.kz/api/login_reg/api-token-auth/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,12 +63,13 @@ public class LoginActivity extends AppCompatActivity {
         super.onResume();
 
         SharedPreferences prefs = getSharedPreferences("user_pref", MODE_PRIVATE);
-        final String login = prefs.getString("login", "");
-        final String psw = prefs.getString("psw", "");
+        final String token = prefs.getString("token", "");
 
-        if (!login.isEmpty() && !psw.isEmpty()) {
+        if (!token.isEmpty()) {
 
-            loginQuery(login, psw);
+            ((MyApplication) getApplication()).setToken(token);
+            Intent intent = new Intent(LoginActivity.this, EventsActivity.class);
+            startActivity(intent);
         }
     }
 
@@ -90,7 +87,7 @@ public class LoginActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
 
         RequestQueue requestQueue = Volley.newRequestQueue(LoginActivity.this);
-        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+        StringRequest postRequest = new StringRequest(Request.Method.POST, Constants.USER_AUTH_URL,
                 new Response.Listener<String>()
                 {
                     // If Success
@@ -116,12 +113,11 @@ public class LoginActivity extends AppCompatActivity {
 
                         // Save user
                         SharedPreferences.Editor editor = getSharedPreferences("user_pref", MODE_PRIVATE).edit();
-                        editor.putString("login", login);
-                        editor.putString("psw", psw);
+                        editor.putString("token", token);
                         editor.apply();
 
                         // Start new Activity
-                        Intent intent = new Intent(LoginActivity.this, CameraActivity.class);
+                        Intent intent = new Intent(LoginActivity.this, EventsActivity.class);
                         startActivity(intent);
                     }
                 },

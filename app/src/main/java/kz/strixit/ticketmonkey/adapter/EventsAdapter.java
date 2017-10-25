@@ -1,4 +1,4 @@
-package kz.strixit.ticketmonkey;
+package kz.strixit.ticketmonkey.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,9 +8,13 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
+
+import kz.strixit.ticketmonkey.Constants;
+import kz.strixit.ticketmonkey.module.EventsModule;
+import kz.strixit.ticketmonkey.R;
 
 /**
  * Created by saken2316 on 10/21/17.
@@ -66,9 +70,10 @@ public class EventsAdapter extends BaseAdapter {
         viewHolder.titleTextView.setText(events.get(i).getTitle());
         viewHolder.priceTextView.setText(events.get(i).getMin_price());
         viewHolder.dateTextView.setText(events.get(i).getEvent_start());
-        Glide
+        Picasso
                 .with(context)
-                .load("http://tktmonkey.kz" + events.get(i).getPortrait_img())
+                .load(Constants.DOMEN + events.get(i).getPortrait_img())
+                .placeholder(R.mipmap.ic_launcher)
                 .into(viewHolder.coverImageView);
 
         return view;

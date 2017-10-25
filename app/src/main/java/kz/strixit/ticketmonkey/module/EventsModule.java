@@ -1,4 +1,4 @@
-package kz.strixit.ticketmonkey;
+package kz.strixit.ticketmonkey.module;
 
 import com.google.gson.annotations.SerializedName;
 
