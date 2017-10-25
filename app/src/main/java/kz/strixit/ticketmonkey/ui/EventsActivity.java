@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -38,7 +39,7 @@ import kz.strixit.ticketmonkey.R;
 
 public class EventsActivity extends AppCompatActivity {
 
-    private String qrCode;
+    private String qrCodeMessage;
     private ListView listView;
 
     private List<EventsModule> events;
@@ -52,7 +53,7 @@ public class EventsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1, myStringArray);
 
         listView = (ListView) findViewById(R.id.listView);
@@ -64,9 +65,16 @@ public class EventsActivity extends AppCompatActivity {
         ((MyApplication) getApplication()).startAlarm();
 
         Intent intent = getIntent();
-        qrCode = intent.getStringExtra("qr_code");
+        qrCodeMessage = intent.getStringExtra("qr_code_message");
 
         getEvents();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Toast.makeText(EventsActivity.this, qrCodeMessage, Toast.LENGTH_SHORT).show();
     }
 
     private void getEvents() {
@@ -139,7 +147,7 @@ public class EventsActivity extends AppCompatActivity {
 
                 Intent intent = new Intent(EventsActivity.this, CameraActivity.class);
                 intent.putExtra("event_id", eventId);
-                startActivity(intent);
+                startActivityForResult(intent, 0);
             }
         });
     }

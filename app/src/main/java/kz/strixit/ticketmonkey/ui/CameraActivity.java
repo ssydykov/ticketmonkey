@@ -109,11 +109,7 @@ public class CameraActivity extends Activity implements ZXingScannerView.ResultH
                         // error
                         Log.e(TAG, "Request error " + error.toString());
 
-                        if (error.networkResponse.statusCode == 400) {
-
-                            Log.e(TAG, "Invalid qr");
-                            startNewActivity("Invalid qr code");
-                        }
+                        startNewActivity("Invalid qr code");
                     }
                 }
         ) {
@@ -145,7 +141,7 @@ public class CameraActivity extends Activity implements ZXingScannerView.ResultH
     private void startNewActivity(String message){
 
         Intent intent = new Intent(CameraActivity.this, EventsActivity.class);
-        intent.putExtra("qr_code", message);
+        intent.putExtra("qr_code_message", message);
         startActivity(intent);
     }
 }
